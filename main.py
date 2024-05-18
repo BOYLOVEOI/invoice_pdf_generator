@@ -46,7 +46,7 @@ for i in file_paths:
     # setting font for the table content
     pdf.set_font(family="Times", size=10, style="B")
     # setting color of the font RGB of (80,80,80) = gray
-    pdf.set_text_color(r=80,g=80,b=80)
+    pdf.set_text_color(r=80, g=80, b=80)
     # adding in the first 'block' of the table, the product_id header
     pdf.cell(w=30, h=8, txt=column_names[0], border=True)
     # adding in the second 'block' of the table, the product_name header
@@ -59,30 +59,43 @@ for i in file_paths:
     # adding in a ln argument for the last 'block' as that is where the
     # row in the invoice table is completed/ended
     pdf.cell(w=30, h=8, txt=column_names[4], border=True, ln=1)
-    
-    # creating a running total 
-    running_total = 0
 
     # reading each row in the dataframe and adding it into the invoice
     # table
     for index, row in df.iterrows():
         pdf.set_font(family="Times", size=10)
-        pdf.set_text_color(r=80,g=80,b=80)
+        pdf.set_text_color(r=80, g=80, b=80)
         pdf.cell(w=30, h=8, txt=str(row["product_id"]), border=True)
         pdf.cell(w=70, h=8, txt=str(row["product_name"]), border=True)
         pdf.cell(w=35, h=8, txt=str(row["amount_purchased"]), border=True)
         pdf.cell(w=30, h=8, txt=str(row["price_per_unit"]), border=True)
         pdf.cell(w=30, h=8, txt=str(row["total_price"]), border=True, ln=1)
-        # incrementing running_total by price to eventually get total price
-        running_total+=row["total_price"]
 
-        # Creating the last "row" for the total price
-        if (index+1) == len(df):
-            pdf.cell(w=30, h=8, border=True)
-            pdf.cell(w=70, h=8, border=True)
-            pdf.cell(w=35, h=8, border=True)
-            pdf.cell(w=30, h=8, border=True) 
-            pdf.cell(w=30, h=8, txt=str(running_total), border=True, ln=1)
+    # Creating the total price to add to the last row
+    total_price = df["total_price"].sum()
+    # Creating the last row for the total (only ONE row so OUTSIDE for loop)
+    pdf.set_font(family="Times", size=10, style="B")
+    pdf.cell(w=30, h=8, border=True)
+    pdf.cell(w=70, h=8, border=True)
+    pdf.cell(w=35, h=8, border=True)
+    pdf.cell(w=30, h=8, border=True) 
+    pdf.cell(w=30, h=8, txt=str(total_price), border=True, ln=1)
+
+    # Adding spacer between table and footer lines
+    pdf.ln()
+
+    # Adding the total price footer line
+    pdf.set_font(family="Times", size=12, style="B")
+    pdf.set_text_color(r=0, g=0, b=0)
+    pdf.cell(w=30, h=8, txt=f"The total price is {total_price}", ln=1)
+    
+    # Adding the company name and logo
+    pdf.set_font(family="Times", size=14, style="B")
+    pdf.set_text_color(r=0, g=0, b=0)
+    pdf.cell(w=25, h=8, txt="PythonHow")
+    pdf.image(name="pythonhow.png", w=10, h=10)
+
+
 
     # outputting each newly created pdf with their own names to the PDF folder
     pdf.output("PDFS/{}.pdf".format(filename.stem))
